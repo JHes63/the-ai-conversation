@@ -1,4 +1,4 @@
-python"""
+"""
 The AI Conversation - Content Sourcing Script
 ------------------------------------------------
 Pulls recent headlines from RSS feeds across the newsletter's four topic
@@ -21,25 +21,43 @@ from datetime import datetime, timedelta, timezone
 # first draft -- Jack should swap in/out sources based on what actually
 # produces good candidates once we see real output.
 
+# PILLAR feeds -- each pillar is a general-interest feed that gets filtered
+# down using AI_KEYWORDS below, since these sources cover more than just AI.
+#
+# To add a new pillar later (e.g. "Second Acts & Experience"), just add a
+# new entry here in the same format:
+#   "Your New Pillar Name": [
+#       "https://example.com/feed",
+#   ],
 FEEDS = {
     "AI in Healthcare": [
         "https://www.healthcareitnews.com/home/feed",
         "https://medcitynews.com/feed/",
-        "https://www.fiercehealthcare.com/rss.xml",
+        "https://www.fiercehealthcare.com/rss/xml",
     ],
     "Retirement & Personal Finance": [
         "https://www.kiplinger.com/feeds/all",
-        "https://www.aarp.org/rss.xml",
+        "https://www.nextavenue.org/feed/",
     ],
     "Education": [
         "https://www.edweek.org/feed",
         "https://www.insidehighered.com/rss.xml",
+        "https://www.eschoolnews.com/feed/",
     ],
     "Government": [
         "https://www.nextgov.com/rss/all/",
-        "https://www.govtech.com/rss/all.rss",
+        "https://www.route-fifty.com/rss/",
     ],
 }
+
+# GENERAL AI feeds -- these sources are already 100% about AI, so we do NOT
+# run the keyword filter on them. This is the "wide net" pillar: it catches
+# important AI news that doesn't fit neatly into the four pillars above, so
+# nothing slips through just because it wasn't phrased in an expected way.
+GENERAL_AI_FEEDS = [
+    "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
+    "https://www.artificialintelligence-news.com/feed/",
+]
 
 # Keywords used to filter each pillar's general feed down to AI-relevant
 # stories only. Case-insensitive match against title + summary.
@@ -83,7 +101,7 @@ def is_recent(entry, cutoff):
     return published_dt >= cutoff
 
 
-def fetch_pillar(pillar_name, feed_urls, cutoff):
+def fetch_pillar(pillar_name, feed_urls, cutoff, require_ai_keyword=True):
     candidates = []
     for url in feed_urls:
         try:
@@ -97,7 +115,8 @@ def fetch_pillar(pillar_name, feed_urls, cutoff):
             continue
 
         for entry in parsed.entries:
-            if is_ai_related(entry) and is_recent(entry, cutoff):
+            ai_ok = is_ai_related(entry) if require_ai_keyword else True
+            if ai_ok and is_recent(entry, cutoff):
                 candidates.append(
                     {
                         "pillar": pillar_name,
@@ -126,6 +145,15 @@ def main():
             print("  (no AI-related candidates found this run)")
         all_candidates.extend(pillar_results)
         print()
+
+    print("--- General AI News ---")
+    general_results = fetch_pillar(
+        "General AI News", GENERAL_AI_FEEDS, cutoff, require_ai_keyword=False
+    )
+    if not general_results:
+        print("  (no candidates found this run)")
+    all_candidates.extend(general_results)
+    print()
 
     # Save results to a plain text file for now.
     # This is what a future "send email" step will read from.
