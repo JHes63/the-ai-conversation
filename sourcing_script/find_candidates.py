@@ -31,22 +31,21 @@ from datetime import datetime, timedelta, timezone
 #   ],
 FEEDS = {
     "AI in Healthcare": [
-        "https://www.healthcareitnews.com/home/feed",
         "https://medcitynews.com/feed/",
-        "https://www.fiercehealthcare.com/rss/xml",
+        "https://www.healthcaredive.com/feeds/news/",
     ],
     "Retirement & Personal Finance": [
         "https://www.kiplinger.com/feeds/all",
-        "https://www.nextavenue.org/feed/",
+        "https://feeds.content.dowjones.io/public/rss/mw_topstories",
     ],
     "Education": [
-        "https://www.edweek.org/feed",
         "https://www.insidehighered.com/rss.xml",
         "https://www.eschoolnews.com/feed/",
+        "https://feeds.feedburner.com/EdTechK12",
     ],
     "Government": [
         "https://www.nextgov.com/rss/all/",
-        "https://www.route-fifty.com/rss/",
+        "https://federalnewsnetwork.com/feed/",
     ],
 }
 
@@ -78,7 +77,7 @@ AI_KEYWORDS = [
 ]
 
 # Only include articles published within this many days
-MAX_AGE_DAYS = 3
+MAX_AGE_DAYS = 5
 
 # How many candidates to keep per pillar (top N most recent)
 MAX_PER_PILLAR = 8
