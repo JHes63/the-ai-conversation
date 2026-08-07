@@ -40,7 +40,6 @@ FEEDS = {
     ],
     "Education": [
         "https://www.insidehighered.com/rss.xml",
-        "https://www.eschoolnews.com/feed/",
         "https://feeds.feedburner.com/EdTechK12",
     ],
     "Government": [
@@ -55,8 +54,8 @@ FEEDS = {
 # nothing slips through just because it wasn't phrased in an expected way.
 GENERAL_AI_FEEDS = [
     "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
-    "https://www.artificialintelligence-news.com/feed/",
-]
+    "https://arstechnica.com/ai/feed/",
+] 
 
 # Keywords used to filter each pillar's general feed down to AI-relevant
 # stories only. Case-insensitive match against title + summary.
@@ -79,6 +78,15 @@ AI_KEYWORDS = [
 # Only include articles published within this many days
 MAX_AGE_DAYS = 5
 
+# Per-pillar overrides -- Education's AI-relevant stories consistently
+# publish outside the default 5-day window, so it gets a wider net.
+# Any pillar not listed here just uses MAX_AGE_DAYS.
+PILLAR_MAX_AGE_DAYS = {
+    "Education": 14, # TEMP diagnostic — confirm eSchool News AI stories exist in a wider window
+}
+
+
+
 # How many candidates to keep per pillar (top N most recent)
 MAX_PER_PILLAR = 8
 
@@ -100,7 +108,7 @@ def is_recent(entry, cutoff):
     return published_dt >= cutoff
 
 
-def fetch_pillar(pillar_name, feed_urls, cutoff, require_ai_keyword=True):
+def fetch_pillar(pillar_name, feed_urls, cutoff, max_age_days, require_ai_keyword=True):
     candidates = []
     for url in feed_urls:
         try:
@@ -109,21 +117,37 @@ def fetch_pillar(pillar_name, feed_urls, cutoff, require_ai_keyword=True):
             print(f"  [!] Could not fetch {url}: {e}")
             continue
 
-        if parsed.bozo and not parsed.entries:
-            print(f"  [!] No entries from {url} (may be a dead/changed feed URL)")
+        total_entries = len(parsed.entries)
+        source_name = parsed.feed.get("title", url)
+
+        if total_entries == 0:
+            print(f"  [!] {source_name}: 0 entries returned (likely a dead/changed feed URL)")
             continue
+
+        ai_matches = 0
+        recent_matches = 0
+        kept = 0
 
         for entry in parsed.entries:
             ai_ok = is_ai_related(entry) if require_ai_keyword else True
-            if ai_ok and is_recent(entry, cutoff):
+            if ai_ok:
+                ai_matches += 1
+            recent_ok = is_recent(entry, cutoff)
+            if recent_ok:
+                recent_matches += 1
+            if ai_ok and recent_ok:
+                kept += 1
                 candidates.append(
                     {
                         "pillar": pillar_name,
                         "title": entry.get("title", "Untitled"),
                         "link": entry.get("link", ""),
-                        "source": parsed.feed.get("title", url),
+                        "source": source_name,
                     }
                 )
+
+        keyword_note = f", {ai_matches} AI-related" if require_ai_keyword else ""
+        print(f"  {source_name}: {total_entries} entries{keyword_note}, {recent_matches} within {max_age_days} days, {kept} kept")
 
     return candidates[:MAX_PER_PILLAR]
 
@@ -132,14 +156,16 @@ def fetch_pillar(pillar_name, feed_urls, cutoff, require_ai_keyword=True):
 # 3. MAIN
 # ---------------------------------------------------------------------------
 def main():
-    cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
+    default_cutoff = datetime.now(timezone.utc) - timedelta(days=MAX_AGE_DAYS)
     all_candidates = []
 
-    print(f"Fetching candidates published since {cutoff.date()}...\n")
+    print(f"Fetching candidates published since {default_cutoff.date()} (default window)...\n")
 
     for pillar_name, feed_urls in FEEDS.items():
         print(f"--- {pillar_name} ---")
-        pillar_results = fetch_pillar(pillar_name, feed_urls, cutoff)
+        max_age = PILLAR_MAX_AGE_DAYS.get(pillar_name, MAX_AGE_DAYS)
+        pillar_cutoff = datetime.now(timezone.utc) - timedelta(days=max_age)
+        pillar_results = fetch_pillar(pillar_name, feed_urls, pillar_cutoff, max_age)
         if not pillar_results:
             print("  (no AI-related candidates found this run)")
         all_candidates.extend(pillar_results)
@@ -147,7 +173,7 @@ def main():
 
     print("--- General AI News ---")
     general_results = fetch_pillar(
-        "General AI News", GENERAL_AI_FEEDS, cutoff, require_ai_keyword=False
+        "General AI News", GENERAL_AI_FEEDS, default_cutoff, MAX_AGE_DAYS, require_ai_keyword=False
     )
     if not general_results:
         print("  (no candidates found this run)")
