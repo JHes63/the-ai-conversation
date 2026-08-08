@@ -113,7 +113,7 @@ export default function Home() {
         <div className="wrap" style={{ display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
           <a href="#" className="nav-brand">
             <img className="nav-icon" src="/icon.png" alt="" />
-            < img className="nav-wordmark-img" src="/wordmark.png" alt="The AI Conversation">
+            <img className="nav-wordmark-img" src="/wordmark.png" alt="The AI Conversation"/>
           </a>
           <ul className="nav-links">
             <li><a href="#">Why This Matters To You</a></li>
