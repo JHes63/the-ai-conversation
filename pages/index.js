@@ -168,7 +168,7 @@ export default function Home() {
 
       <section className="broadcast">
         <div className="divider">
-          <img className="divider-icon" src={`data:image/png;base64,${ICON_B64}`} alt="" />
+          <img className="divider-icon" src="/icon.png"="" />
         </div>
         <div className="wrap">
           <div>
