@@ -1,4 +1,3 @@
-javascript
 import { ICON_B64, WORDMARK_B64, FOOTER_LOGO_B64 } from "../lib/images";
 
 export default function Home() {
