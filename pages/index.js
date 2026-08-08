@@ -168,7 +168,7 @@ export default function Home() {
 
       <section className="broadcast">
         <div className="divider">
-          <img className="divider-icon" src="/icon.png"="" />
+          <img className="divider-icon" src="/icon.png" />
         </div>
         <div className="wrap">
           <div>
