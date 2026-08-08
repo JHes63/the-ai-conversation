@@ -229,7 +229,7 @@ export default function Home() {
 
       <footer className="footer">
         <div className="wrap">
-          <img className="footer-logo-img" src={`data:image/png;base64,${FOOTER_LOGO_B64}`} alt="The AI Conversation" />
+          <img className="footer-logo-img" src="/footer-logo.png" alt="The AI Conversation" />
           <ul className="footer-links">
             <li><a href="#">Why This Matters To You</a></li>
             <li><a href="#">Archive</a></li>
