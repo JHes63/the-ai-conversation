@@ -1,5 +1,3 @@
-import { ICON_B64, WORDMARK_B64, FOOTER_LOGO_B64 } from "../lib/images";
-
 export default function Home() {
   return (
     <>
@@ -114,8 +112,8 @@ export default function Home() {
       <nav className="nav">
         <div className="wrap" style={{ display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
           <a href="#" className="nav-brand">
-            <img className="nav-icon" src={`data:image/png;base64,${ICON_B64}`} alt="" />
-            <img className="nav-wordmark-img" src={`data:image/png;base64,${WORDMARK_B64}`} alt="The AI Conversation" />
+            <img className="nav-icon" src="/icon.png" alt="" />
+            < img className="nav-wordmark-img" src="/wordmark.png" alt="The AI Conversation">
           </a>
           <ul className="nav-links">
             <li><a href="#">Why This Matters To You</a></li>
@@ -130,7 +128,7 @@ export default function Home() {
         <div className="hero-content">
           <div className="wrap hero-grid">
             <div>
-              <img className="hero-icon" src={`data:image/png;base64,${ICON_B64}`} alt="" />
+              <img className="hero-icon" src="/icon.png" alt="" />
               <div className="eyebrow">As we teach AI to be more like us,<br />AI will teach us more about ourselves.</div>
               <h1 className="mission">We won&apos;t tell you what to think about AI. We&apos;ll tell you what it means for your life. <em>Then you decide.</em></h1>
               <p className="subhead">A weekly conversation for those who&apos;ve lived enough history to recognize when they&apos;re standing in the middle of it.</p>
